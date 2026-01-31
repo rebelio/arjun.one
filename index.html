@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arjun | arjun.one</title>
+  
+  <link rel="icon" type="image/png" href="https://gcdnb.pbrd.co/images/wdG247DvCyHs.png">
+
+  <style>
+    :root {
+      --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      
+      /* --- APPLE SYSTEM PALETTE --- */
+      --c-action: #007AFF; /* System Blue */
+      --c-success: #34C759; /* System Green */
+      --c-warning: #FF9500; /* System Orange */
+      --c-danger: #FF3B30; /* System Red */
+      
+      /* --- CODE#1 GLASS PARAMETERS --- */
+      --c-glass: #bfbfbf;
+      --c-light: #ffffff;
+      --c-dark: #000000;
+      --c-content: #1d1d1f;
+      --c-bg: #F2F2F7; /* iOS System Gray 6 (Light) */
+      
+      --glass-reflex-dark: 1;
+      --glass-reflex-light: 1;
+      --saturation: 150%;
+      --active-index: 0;
+    }
+
+    body:has(.toggle:checked) {
+      --c-bg: #000000; /* OLED Black */
+      --c-content: #F5F5F7;
+      --c-action: #0A84FF; /* Dark Mode Blue */
+      --c-glass: #2c2c2e;
+      
+      --glass-reflex-dark: 2;
+      --glass-reflex-light: 0.3;
+    }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 120px; }
+
+    body {
+      font-family: var(--font-apple);
+      background: var(--c-bg);
+      color: var(--c-content);
+      margin: 0;
+      transition: background 600ms cubic-bezier(0.4, 0, 0.2, 1);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* --- 1. STRICT CODE#1 TOGGLE --- */
+    .dark-mode-container { position: fixed; top: 40px; right: 40px; z-index: 2000; display: flex; align-items: center; gap: 12px; }
+    
+    /* UPDATED LABEL */
+    .dark-mode-label { 
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em; 
+      color: var(--c-content); opacity: 0.5; font-family: var(--font-apple);
+    }
+    
+    .toggle {
+      width: 64px; height: 28px; border-radius: 15px; padding: 2px; margin: 0; border: none;
+      background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+      backdrop-filter: blur(8px) url(#switcher) saturate(var(--saturation));
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-light) 10%, transparent), inset 1.8px 3px 0px -2px color-mix(in srgb, var(--c-light) 90%, transparent);
+      cursor: pointer; appearance: none; display: inline-grid; 
+      grid-template-columns: 0fr 2fr 1fr; /* Mechanical Bounce */
+      transition: all 0.3s;
+    }
+    .toggle:before { content: ""; border-radius: 13px; background-color: #fff; grid-row-start: 1; grid-column-start: 2; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 2.2); }
+    .toggle:checked { background-color: var(--c-success); grid-template-columns: 1fr 2fr 0fr; }
+
+    /* --- 2. STRICT CODE#1 NAVIGATION --- */
+    .switcher {
+      position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; width: 380px; height: 90px; padding: 10px; border-radius: 45px;
+      background-color: color-mix(in srgb, var(--c-glass) 12%, transparent);
+      backdrop-filter: blur(8px) url(#switcher) saturate(var(--saturation));
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-light) 10%, transparent), inset 1.8px 3px 0px -2px color-mix(in srgb, var(--c-light) 90%, transparent), 0 20px 40px rgba(0,0,0,0.15);
+      box-sizing: border-box; z-index: 1000;
+    }
+    .switcher__option { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-decoration: none; z-index: 2; color: var(--c-content); transition: color 0.3s ease; }
+    .switcher__option span { font-size: 11px; font-weight: 600; margin-top: 8px; letter-spacing: 0.02em; }
+    
+    /* SF SYMBOL STYLE ICONS (Stroke width adjusted) */
+    .switcher__icon { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .switcher__icon.fill { fill: currentColor; stroke: none; }
+    
+    .switcher__option.is-active { color: var(--c-action); }
+    .switcher::after {
+      content: ""; position: absolute; width: calc((100% - 20px) / 4); height: calc(100% - 20px);
+      top: 10px; left: 10px; border-radius: 99em; background-color: color-mix(in srgb, var(--c-glass) 36%, transparent);
+      z-index: 1; transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1); transform: translateX(calc(var(--active-index) * 100%));
+    }
+
+    /* --- CONTENT --- */
+    .container { max-width: 1040px; margin: 0 auto; padding: 140px 24px 300px; position: relative; z-index: 5; }
+    section { min-height: 85vh; margin-bottom: 120px; opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); }
+    section.visible { opacity: 1; transform: translateY(0); }
+    
+    .eyebrow { font-size: 13px; font-weight: 700; color: var(--c-action); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; display: block; opacity: 0.9; }
+    h1 { font-size: clamp(48px, 8vw, 88px); font-weight: 700; letter-spacing: -0.03em; margin: 0 0 40px 0; line-height: 1.05; }
+    .intro-text { font-size: 24px; line-height: 1.45; font-weight: 400; opacity: 0.85; max-width: 680px; margin: 0 auto 60px; letter-spacing: -0.01em; }
+
+    .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+    
+    /* Card Styles - iOS Control Center Feel */
+    .card {
+      background: color-mix(in srgb, var(--c-glass) 12%, transparent);
+      backdrop-filter: blur(50px) saturate(180%);
+      -webkit-backdrop-filter: blur(50px) saturate(180%);
+      border-radius: 38px; padding: 36px; position: relative; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.02);
+      display: flex; flex-direction: column; justify-content: flex-end;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+    }
+    .card:hover { transform: scale(1.02); box-shadow: 0 20px 50px rgba(0,0,0,0.12); z-index: 10; border-color: rgba(255,255,255,0.2); }
+    
+    .col-8 { grid-column: span 8; } .col-4 { grid-column: span 4; } .col-6 { grid-column: span 6; } .col-12 { grid-column: span 12; }
+    
+    .card-title { font-size: 26px; font-weight: 600; margin-bottom: 6px; z-index: 5; letter-spacing: -0.02em; }
+    .card-sub { font-size: 13px; opacity: 0.6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; display:block; z-index: 5; }
+    .card-text { font-size: 17px; line-height: 1.4; opacity: 0.75; z-index: 5; max-width: 95%; font-weight: 400; }
+
+    /* WIDGET: Apple Reminders Style List */
+    .status-list { width: 100%; margin-bottom: 12px; }
+    .status-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(150,150,150,0.15); font-size: 15px; }
+    .status-item:last-child { border: none; }
+    
+    /* Apple Checkbox Style */
+    .status-check { 
+      width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--c-action); 
+      display: flex; align-items: center; justify-content: center; color: transparent;
+    }
+    .status-check.checked { background: var(--c-action); color: #fff; }
+    .status-check svg { width: 12px; height: 12px; stroke-width: 3px; }
+    
+    .status-label { font-weight: 500; letter-spacing: -0.01em; }
+
+    /* WIDGET: Zen Focus (AirPods LED Style) */
+    .zen-container { position: absolute; top: 32px; right: 32px; }
+    .breathing-light {
+      width: 10px; height: 10px; background: var(--c-success); border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7);
+      animation: breathe 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes breathe {
+      0% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.7); opacity: 1; }
+      50% { box-shadow: 0 0 0 12px rgba(52, 199, 89, 0); opacity: 0.6; }
+      100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); opacity: 1; }
+    }
+
+    /* WIDGET: Memoji Style Icon Container */
+    .icon-container { 
+      width: 52px; height: 52px; border-radius: 14px; 
+      display: flex; align-items: center; justify-content: center; 
+      font-size: 26px; margin-bottom: 16px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Location Widget */
+    .location-badge { 
+      display:inline-flex; align-items:center; gap:6px; 
+      background:rgba(255,255,255,0.15); padding:6px 12px; border-radius:20px; 
+      font-size:12px; font-weight:600; color:var(--c-content); backdrop-filter: blur(10px);
+    }
+    .location-icon { width: 12px; height: 12px; fill: var(--c-action); }
+
+    /* Memoji Hero */
+    .memoji-img { width: 180px; height: 180px; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.15)); margin-bottom: 24px; animation: float 6s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    /* Apple-style Gradient Blob */
+    .ambient-blob { position: fixed; width: 90vw; height: 90vw; border-radius: 50%; background: radial-gradient(circle, var(--c-action) 0%, transparent 65%); filter: blur(140px); opacity: 0.12; z-index: -1; pointer-events: none; top: -40%; left: 50%; transform: translateX(-50%); }
+    
+    @media (max-width: 768px) {
+      .col-8, .col-4, .col-6 { grid-column: span 12; }
+      .container { padding-top: 100px; }
+      h1 { font-size: 42px; }
+      .intro-text { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-blob"></div>
+
+  <div class="dark-mode-container">
+    <span class="dark-mode-label">DARK MODE</span>
+    <input type="checkbox" class="toggle" id="darkModeToggle" checked />
+  </div>
+
+  <nav class="switcher">
+    <a href="#intro" class="switcher__option" data-idx="0">
+      <svg class="switcher__icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="#work" class="switcher__option" data-idx="1">
+      <svg class="switcher__icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Work</span>
+    </a>
+    <a href="#about" class="switcher__option" data-idx="2">
+      <svg class="switcher__icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>About</span>
+    </a>
+    <a href="#hello" class="switcher__option" data-idx="3">
+      <svg class="switcher__icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>Contact</span>
+    </a>
+  </nav>
+
+  <main class="container">
+    <section id="intro" style="text-align:center;">
+      <img src="https://gcdnb.pbrd.co/images/wdG247DvCyHs.png" alt="Arjun Memoji" class="memoji-img">
+      <span class="eyebrow">Building Quietly</span>
+      <h1>Calm. Simple. Intentional.</h1>
+      <p class="intro-text">I build things that feel calm, simple, and intentional. Mostly online. Usually after thinking about them for a while.</p>
+      
+      <div class="bento-grid" style="text-align: left;">
+        <div class="card col-4">
+            <div class="card-title">Arjun</div>
+            <p class="card-text">Building patiently in Kochi.</p>
+        </div>
+        <div class="card col-8" style="flex-direction:row; align-items:center; justify-content:space-between;">
+            <div>
+                <span class="card-sub">Philosophy</span>
+                <div class="card-title">Less Noise.</div>
+                <p class="card-text">Simple on the surface, thoughtfully built underneath.</p>
+            </div>
+            <svg width="80" height="80" viewBox="0 0 100 100" style="opacity:0.5">
+                <circle cx="50" cy="50" r="40" stroke="var(--c-content)" stroke-width="2" fill="none" opacity="0.3"/>
+                <circle cx="50" cy="50" r="25" stroke="var(--c-content)" stroke-width="2" fill="none" />
+            </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="work">
+      <span class="eyebrow">What I Do</span>
+      <h1>Building Brands.</h1>
+      <div class="bento-grid">
+        
+        <div class="card col-8">
+             <span class="card-sub">E-Commerce</span>
+             <div class="card-title">End to End</div>
+             <p class="card-text">I build and run brands. From early ideas to real products. From sourcing to selling. I don't talk about it much. I just keep refining.</p>
+        </div>
+
+        <div class="card col-4" style="padding: 24px;">
+            <div class="status-list">
+                <div class="status-item">
+                    <div class="status-check checked"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    <span class="status-label">Sourcing</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-check checked"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    <span class="status-label">Selling</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-check checked"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    <span class="status-label">Refining</span>
+                </div>
+            </div>
+            <div class="card-title" style="margin-top:auto; font-size:20px;">Operations</div>
+            <p class="card-text" style="font-size:14px; opacity:0.6">Active Systems.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="about">
+      <span class="eyebrow">About & Now</span>
+      <h1>Systems & Context.</h1>
+      <div class="bento-grid">
+        
+        <div class="card col-8">
+            <div class="card-title">Quiet Systems</div>
+            <p class="card-text">I’m drawn to systems that work quietly and age well. I care about how things feel to use, not just how they look.</p>
+        </div>
+
+        <div class="card col-4" style="background: color-mix(in srgb, var(--c-content) 5%, transparent);">
+            <div class="zen-container"><div class="breathing-light"></div></div>
+            <span class="card-sub" style="color: var(--c-success);">Status</span>
+            <div class="card-title">Focus</div>
+            <p class="card-text" style="font-size:15px; opacity:0.8;">Reducing noise. Improving systems. Slow progress. On purpose.</p>
+        </div>
+
+        <div class="card col-4">
+            <div class="icon-container" style="background: #FFD60A; color: #000;">🐕</div>
+            <div class="card-title">Tany</div>
+            <p class="card-text" style="font-size:14px; opacity:0.7;">4yo Golden Retriever.<br>Chief Morale Officer.</p>
+        </div>
+
+        <div class="card col-8">
+            <div style="position:absolute; top:30px; right:30px;">
+                <span class="location-badge">
+                    <svg class="location-icon" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                    Kochi
+                </span>
+            </div>
+            <span class="card-sub">Botany</span>
+            <div class="card-title">The Mandarin Project</div>
+            <p class="card-text">Growing citrus in the tropics. A lesson in patience.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="hello">
+        <span class="eyebrow">Hello</span>
+        <h1>Reach Out.</h1>
+        <a href="mailto:hi@arjun.email" class="card col-12" style="text-decoration:none; color:inherit; text-align:center; padding: 100px 40px; border-color: var(--c-action);">
+            <div class="card-title" style="font-size: clamp(32px, 5vw, 54px); color: var(--c-action);">hi@arjun.email</div>
+            <p class="card-text" style="opacity: 0.6; margin-top: 16px;">If something here resonates, feel free to reach out.<br>No pitch. No rush.</p>
+        </a>
+    </section>
+  </main>
+
+  <div style="height: 0; width: 0; position: absolute; visibility: hidden;">
+    <svg><filter id="switcher" primitiveUnits="objectBoundingBox"><feImage result="map" width="100%" height="100%" x="0" y="0" href="data:image/webp;base64,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??" /></filter></svg>
+  </div>
+
+  <script>
+    const navLinks = document.querySelectorAll(".switcher__option");
+    const sections = document.querySelectorAll("section");
+    const root = document.documentElement;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          const id = entry.target.getAttribute("id");
+          const idxMap = { 'intro': 0, 'work': 1, 'about': 2, 'hello': 3 };
+          root.style.setProperty('--active-index', idxMap[id]);
+          navLinks.forEach(l => l.classList.remove('is-active'));
+          navLinks[idxMap[id]].classList.add('is-active');
+        }
+      });
+    }, { threshold: 0.3 });
+
+    sections.forEach(s => observer.observe(s));
+  </script>
+</body>
+</html>
